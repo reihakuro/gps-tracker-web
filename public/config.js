@@ -1,12 +1,16 @@
 // File: config.js
 
 export const firebaseConfig = {
-    apiKey: "AIzaSyAwVMT-rUj-zWNuXR7Jy7WnM2dgVNv1VFY",
+    apiKey: "AIzaSyAsWiIz-UJ-z0HuXBZ3yZMnB2dgVNv1VFY", // This key is intended to be public. Secure your app with Firebase Security Rules.
     authDomain: "esp32-gps-tracker-f60da.firebaseapp.com",
     databaseURL: "https://esp32-gps-tracker-f60da-default-rtdb.firebaseio.com",
     projectId: "esp32-gps-tracker-f60da",
-    appId: "1:847848429624:web:b6d02dab7ddfebedd52ecd"
+    storageBucket: "esp32-gps-tracker-f60da.appspot.com",
+    messagingSenderId: "847848429624",
+    appId: "1:847848429624:web:b6d02dab7ddfebedd52ecd",
 };
+
+export const appVersion = "2.0.1504"; 
 
 export const i18n = {
     vi: { 

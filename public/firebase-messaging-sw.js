@@ -4,7 +4,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-comp
 
 // 1. Khởi tạo lại Firebase trong luồng chạy ngầm
 firebase.initializeApp({
-    apiKey: "AIzaSyAwVMT-rUj-zWNuXR7Jy7WnM2dgVNv1VFY",
+    apiKey: "AIzaSyAsWiIz-UJ-z0HuXBZ3yZMnB2dgVNv1VFY",
     authDomain: "esp32-gps-tracker-f60da.firebaseapp.com",
     databaseURL: "https://esp32-gps-tracker-f60da-default-rtdb.firebaseio.com",
     projectId: "esp32-gps-tracker-f60da",

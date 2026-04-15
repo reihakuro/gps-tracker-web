@@ -1,8 +1,9 @@
-import { firebaseConfig, validUsers, i18n } from './config.js';
+import { firebaseConfig, i18n, appVersion } from './config.js';
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
 
 L.Routing.Localization = L.Routing.Localization || {};
 L.Routing.Localization['vi'] = {
@@ -43,6 +44,41 @@ document.addEventListener('visibilitychange', async () => {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const messaging = getMessaging(app);
+
+// Hàm yêu cầu quyền và lấy token FCM
+async function setupFCM() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+            
+            // Lấy VAPID key từ Firebase Console
+            // Project Settings > Cloud Messaging > Web configuration > Web Push certificates
+            const token = await getToken(messaging, { vapidKey: 'BBb6jJYU9g3GhTnTIgcftV_52w5_zx8ZnSbuEpF8q8RSl54IdvEY8kud5LpCLZNKrUI9qRWXTtwc2uvObLJffaU' });
+
+            if (token) {
+                console.log('FCM Token:', token);
+                // QUAN TRỌNG: Bạn cần gửi token này về server và lưu lại cùng với thông tin user.
+                // Backend sẽ dùng token này để gửi push notification đến đúng thiết bị này.
+            } else {
+                console.log('Không thể lấy token. Hãy chắc chắn bạn đã cấp quyền thông báo.');
+            }
+        } else {
+            console.log('Không được cấp quyền nhận thông báo.');
+        }
+    } catch (err) {
+        console.error('Lỗi khi lấy token FCM: ', err);
+    }
+}
+
+// Lắng nghe tin nhắn khi người dùng đang mở app (foreground)
+onMessage(messaging, (payload) => {
+    console.log('Đã nhận tin nhắn (foreground): ', payload);
+    const { title, body } = payload.notification;
+    // Hiển thị thông báo
+    new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/564/564276.png' });
+});
 
 // Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
@@ -72,16 +108,17 @@ document.getElementById('login-btn').onclick = async () => {
     try {
         await signInWithEmailAndPassword(auth, email, pass);
         // If successful, onAuthStateChanged will handle UI updates
-        document.getElementById('login-overlay').style.opacity = '0';
-        if ("Notification" in window && Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
+        setupFCM(); // Yêu cầu quyền và lấy token sau khi đăng nhập
         requestWakeLock(); // Kích hoạt chống tắt màn hình
         setTimeout(() => { document.getElementById('login-overlay').style.display = 'none'; }, 500); 
         err.style.display = 'none'; // Hide error if previous attempt failed
     } catch (error) {
         console.error("Login error:", error.code, error.message);
-        err.innerText = currentLang === 'vi' ? "Tên đăng nhập hoặc mật khẩu không đúng." : "Invalid email or password.";
+        if (currentLang === 'vi') {
+            err.innerText = `Đăng nhập với email "${email}" không thành công. Vui lòng kiểm tra lại.`;
+        } else {
+            err.innerText = `Login failed for "${email}". Please check your credentials.`;
+        }
         err.style.display = 'block';
         err.style.animation = 'none';
         setTimeout(() => err.style.animation = 'shake 0.4s', 10);
@@ -182,8 +219,8 @@ function startNavigation() {
         routingControl.on('routesfound', function(e) {
             const routes = e.routes;
             
-            let minsPerKm = 3.5; // Xe máy (trung bình 3-4 phút/km)
-            if (mode === 'driving') minsPerKm = 5; // Xe hơi (trung bình 4-6 phút/km)
+            let minsPerKm = 3.5;                    // Xe máy (trung bình 3-4 phút/km)
+            if (mode === 'driving') minsPerKm = 5;  // Xe hơi (trung bình 4-6 phút/km)
             if (mode === 'walking') minsPerKm = 15; // Đi bộ (15 phút/km)
 
             const secsPerMeter = (minsPerKm * 60) / 1000;
@@ -277,6 +314,9 @@ onValue(ref(db, 'tracker/live'), (snapshot) => {
             if (!isFalling) {
                 isFalling = true;
                 
+                // GHI CHÚ: Đoạn code dưới đây tạo thông báo cục bộ.
+                // Nó sẽ trở nên không cần thiết nếu bạn đã có một backend gửi push notification qua FCM,
+                // vì listener onMessage ở trên sẽ xử lý việc này. Tuy nhiên, ta có thể giữ lại làm phương án dự phòng.
                 if ("Notification" in window && Notification.permission === "granted") {
                     const msgTitle = currentLang === 'vi' ? 'CẢNH BÁO TỪ GPS TRACKER!' : 'GPS TRACKER ALERT!';
                     const msgBody = currentLang === 'vi' ? 'Hệ thống vừa phát hiện sự cố té ngã/đổ xe!' : 'A fall/crash has been detected!';
@@ -341,3 +381,11 @@ function loadFallData() {
 
 document.getElementById('export-excel-btn').onclick = () => { const wb = XLSX.utils.table_to_book(document.getElementById('history-table'), { sheet: "LichSu" }); XLSX.writeFile(wb, "Lich_Su_Di_Chuyen.xlsx"); };
 document.getElementById('export-fall-excel-btn').onclick = () => { const wb = XLSX.utils.table_to_book(document.getElementById('fall-table'), { sheet: "TeNga" }); XLSX.writeFile(wb, "Lich_Su_Te_Nga.xlsx"); };
+
+// Hiển thị phiên bản ứng dụng lên giao diện
+document.addEventListener('DOMContentLoaded', () => { 
+    const versionDisplay = document.getElementById('app-version-display');
+    if (versionDisplay) {
+        versionDisplay.innerText = 'Version V' + appVersion; 
+    }
+});
