@@ -4,6 +4,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
+import { initializeDataService, loadHistoryData, loadFallData, exportHistoryToExcel, exportFailsToExcel } from './dataService.js';
 
 L.Routing.Localization = L.Routing.Localization || {};
 L.Routing.Localization['vi'] = {
@@ -45,6 +46,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const messaging = getMessaging(app);
+initializeDataService(db);
 
 // Hàm yêu cầu quyền và lấy token FCM
 async function setupFCM() {
@@ -379,35 +381,8 @@ setInterval(() => {
     }
 }, 30000);
 
-function loadHistoryData() {
-    const tbody = document.getElementById('history-body'); 
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
-    get(ref(db, 'tracker/history')).then((snapshot) => {
-        if (snapshot.exists()) {
-            let htmlString = ''; 
-            snapshot.forEach((child) => { 
-                const row = child.val(); 
-                htmlString += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td></tr>`; 
-            });
-            tbody.innerHTML = htmlString; 
-        } else {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Chưa có dữ liệu</td></tr>`;
-        }
-    });
-}
-
-function loadFallData() {
-    const tbody = document.getElementById('fall-body'); tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
-    get(ref(db, 'tracker/fall_history')).then((snapshot) => {
-        tbody.innerHTML = '';
-        if (snapshot.exists()) {
-            snapshot.forEach((child) => { const row = child.val(); tbody.innerHTML += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td></tr>`; });
-        } else tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Chưa có ghi nhận sự cố nào.</td></tr>`;
-    });
-}
-
-document.getElementById('export-excel-btn').onclick = () => { const wb = XLSX.utils.table_to_book(document.getElementById('history-table'), { sheet: "LichSu" }); XLSX.writeFile(wb, "Lich_Su_Di_Chuyen.xlsx"); };
-document.getElementById('export-fall-excel-btn').onclick = () => { const wb = XLSX.utils.table_to_book(document.getElementById('fall-table'), { sheet: "TeNga" }); XLSX.writeFile(wb, "Lich_Su_Te_Nga.xlsx"); };
+document.getElementById('export-excel-btn').onclick = exportHistoryToExcel;
+document.getElementById('export-fall-excel-btn').onclick = exportFailsToExcel;
 
 // Hiển thị phiên bản ứng dụng lên giao diện
 document.addEventListener('DOMContentLoaded', () => { 
