@@ -10,7 +10,7 @@ export const firebaseConfig = {
     appId: "1:847848429624:web:b6d02dab7ddfebedd52ecd",
 };
 
-export const appVersion = "2.0.1504"; 
+export const appVersion = "2.2.17"; 
 
 export const i18n = {
     vi: { 
@@ -22,7 +22,7 @@ export const i18n = {
         val_group: "Nhóm 7 tại HCM-UTE", btn_close: "Đóng", 
         val_quote: '"Chia sẻ là cách tốt nhất để học tập"', btn_buzzer: "🔊 Tìm xe", 
         btn_history: "📜 Lịch sử", btn_fall: "🔔 Té ngã", history_title: "Lịch sử di chuyển", 
-        fall_title: "Lịch sử sự cố (Té ngã)", btn_export: "Tải file Excel", 
+        fall_title: "Lịch sử sự cố", btn_export: "Tải file Excel", 
         th_time: "Thời gian", th_lat: "Vĩ độ (Lat)", th_lng: "Kinh độ (Lng)", 
         th_speed: "Vận tốc", btn_logout: "Thoát" 
     },

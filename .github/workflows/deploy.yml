@@ -21,4 +21,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GPS_TRACKER }}'
           channelId: live
-          projectId: gps-tracker-web # Thay bằng Project ID thực tế của bạn
+          projectId: gps-tracker-web 

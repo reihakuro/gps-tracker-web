@@ -1,0 +1,23 @@
+{
+  "name": "web_gps",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/reihakuro/gps-tracker-web#readme",
+  "bugs": {
+    "url": "https://github.com/reihakuro/gps-tracker-web/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reihakuro/gps-tracker-web.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.14.0"
+  }
+}

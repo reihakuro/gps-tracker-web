@@ -80,12 +80,39 @@ onMessage(messaging, (payload) => {
     new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/564/564276.png' });
 });
 
+// Ánh xạ username sang tên hiển thị đầy đủ
+const nameMappings = {
+    'trungkien': 'Trung Kien',
+    'dinhkhang': 'Dinh Khang',
+    'thanhtu': 'Thanh Tu',
+    'baophuc': 'Bao Phuc',
+    'tranhuy': 'Tran Huy',
+};
+
+/**
+ * Lấy tên đã được định dạng của người dùng để hiển thị.
+ * Ưu tiên: displayName > ánh xạ trong nameMappings > viết hoa chữ cái đầu của username.
+ * @param {object} user - Đối tượng người dùng từ Firebase Auth.
+ * @returns {string} Tên đã định dạng.
+ */
+function getFormattedName(user) {
+    if (!user) return '';
+    if (user.displayName) return user.displayName;
+
+    if (user.email) {
+        const username = user.email.split('@')[0];
+        if (nameMappings[username]) return nameMappings[username];
+        return username.charAt(0).toUpperCase() + username.slice(1);
+    }
+    return ''; // Trả về chuỗi rỗng nếu không có thông tin
+}
+
 // Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('login-overlay').style.display = 'none';
         const prefix = currentLang === 'vi' ? "Xin chào, " : "Hello, ";
-        document.getElementById('welcome-text').innerText = prefix + (user.displayName || user.email) + "!";
+        document.getElementById('welcome-text').innerText = prefix + getFormattedName(user) + "!";
         requestWakeLock(); // Bật chống ngủ
     } else {
         document.getElementById('login-overlay').style.display = 'flex';
@@ -151,7 +178,7 @@ function updateUI() {
     const user = auth.currentUser; // Get current authenticated user
     if (user) { 
         const prefix = currentLang === 'vi' ? "Xin chào, " : "Hello, "; 
-        document.getElementById('welcome-text').innerText = prefix + (user.displayName || user.email) + "!"; 
+        document.getElementById('welcome-text').innerText = prefix + getFormattedName(user) + "!"; 
     } else { document.getElementById('welcome-text').innerText = ''; }
     const dwellVal = document.getElementById('dwell-val').innerText;
     if (dwellVal === "Moving" || dwellVal === "Đang di chuyển") { document.getElementById('dwell-val').innerText = currentLang === 'vi' ? "Đang di chuyển" : "Moving"; }
@@ -354,17 +381,17 @@ setInterval(() => {
 
 function loadHistoryData() {
     const tbody = document.getElementById('history-body'); 
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
     get(ref(db, 'tracker/history')).then((snapshot) => {
         if (snapshot.exists()) {
             let htmlString = ''; 
             snapshot.forEach((child) => { 
                 const row = child.val(); 
-                htmlString += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td><td>${row.speed || 0}</td></tr>`; 
+                htmlString += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td></tr>`; 
             });
             tbody.innerHTML = htmlString; 
         } else {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Chưa có dữ liệu</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Chưa có dữ liệu</td></tr>`;
         }
     });
 }
@@ -386,6 +413,17 @@ document.getElementById('export-fall-excel-btn').onclick = () => { const wb = XL
 document.addEventListener('DOMContentLoaded', () => { 
     const versionDisplay = document.getElementById('app-version-display');
     if (versionDisplay) {
-        versionDisplay.innerText = 'Version V' + appVersion; 
+        versionDisplay.innerText = 'Version v' + appVersion; 
+    }
+
+    // Ẩn các thành phần hiển thị vận tốc
+    const speedValueEl = document.getElementById('speed-val');
+    if (speedValueEl && speedValueEl.parentElement) {
+        // Giả định rằng label và value của vận tốc nằm trong cùng một thẻ cha để ẩn cả hai
+        speedValueEl.parentElement.style.display = 'none';
+    }
+    const speedHeaderEl = document.querySelector('th[data-key="th_speed"]');
+    if (speedHeaderEl) {
+        speedHeaderEl.style.display = 'none';
     }
 });
