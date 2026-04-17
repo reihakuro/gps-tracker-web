@@ -1,24 +1,35 @@
-name: Deploy to Firebase Hosting
+name: Code Quality Check
+
 on:
   push:
-    branches: [main]
-    paths:
-      - 'public/**'
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build_and_deploy:
+  check:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GPS_TRACKER }}'
-          channelId: live
-          projectId: esp32-gps-tracker-f60da
+          node-version: 18
+          cache: 'npm' 
+
+      - name: Install dependencies
+        run: |
+          cd gps-tracker
+          npm install
+
+      - name: Build Check
+        run: |
+          cd gps-tracker
+          npm run build
+        env:
+          # Vẫn cần các biến này để lệnh 'npm run build' của Vite không bị lỗi
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
