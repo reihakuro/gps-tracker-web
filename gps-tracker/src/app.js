@@ -1,10 +1,23 @@
-import { firebaseConfig, i18n, appVersion } from './config.js';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import 'leaflet-routing-machine';
+import * as XLSX from 'xlsx';
+import './style.css';
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
+import { firebaseConfig, i18n, appVersion } from './config.js';
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, onValue, set, get } from "firebase/database";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { initializeDataService, loadHistoryData, loadFallData, exportHistoryToExcel, exportFailsToExcel } from './dataService.js';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 L.Routing.Localization = L.Routing.Localization || {};
 L.Routing.Localization['vi'] = {
@@ -115,12 +128,17 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('login-overlay').style.display = 'none';
         const prefix = currentLang === 'vi' ? "Xin chào, " : "Hello, ";
         document.getElementById('welcome-text').innerText = prefix + getFormattedName(user) + "!";
-        requestWakeLock(); // Bật chống ngủ
+        
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 400); 
+
+        requestWakeLock();
     } else {
         document.getElementById('login-overlay').style.display = 'flex';
         document.getElementById('login-overlay').style.opacity = '1';
         document.getElementById('welcome-text').innerText = '';
-        if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } // Tắt chống ngủ
+        if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } 
     }
 });
 

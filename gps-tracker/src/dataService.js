@@ -1,4 +1,4 @@
-import { ref, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { ref, get } from "firebase/database"; 
 
 let db;
 
