@@ -325,7 +325,6 @@ onValue(ref(db, 'tracker/live'), (snapshot) => {
         esp32Pos = [data.gps.lat, data.gps.lng]; 
         marker.setLatLng(esp32Pos); 
         currentSpeedVal = data.gps.speed || 0;
-        document.getElementById('speed-val').innerText = currentSpeedVal.toFixed(1);
         checkDwellTime(data.gps.lat, data.gps.lng);
     }
 
@@ -375,7 +374,7 @@ setInterval(() => {
     if (auth.currentUser && esp32Pos[0]) { // Check if user is authenticated
         if (currentSpeedVal > 1 || lastSavedLat !== esp32Pos[0] || lastSavedLng !== esp32Pos[1]) {
             const timeStr = new Date().toLocaleString('vi-VN');
-            set(ref(db, 'tracker/history/' + Date.now()), { timestamp: timeStr, lat: esp32Pos[0], lng: esp32Pos[1], speed: currentSpeedVal });
+            set(ref(db, 'tracker/history/' + Date.now()), { timestamp: timeStr, lat: esp32Pos[0], lng: esp32Pos[1] });
             lastSavedLat = esp32Pos[0]; lastSavedLng = esp32Pos[1];
         }
     }
@@ -389,16 +388,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const versionDisplay = document.getElementById('app-version-display');
     if (versionDisplay) {
         versionDisplay.innerText = 'Version v' + appVersion; 
-    }
-
-    // Ẩn các thành phần hiển thị vận tốc
-    const speedValueEl = document.getElementById('speed-val');
-    if (speedValueEl && speedValueEl.parentElement) {
-        // Giả định rằng label và value của vận tốc nằm trong cùng một thẻ cha để ẩn cả hai
-        speedValueEl.parentElement.style.display = 'none';
-    }
-    const speedHeaderEl = document.querySelector('th[data-key="th_speed"]');
-    if (speedHeaderEl) {
-        speedHeaderEl.style.display = 'none';
     }
 });
