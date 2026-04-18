@@ -1,5 +1,5 @@
 import { ref, get } from "firebase/database"; 
-
+import * as XLSX from "xlsx"; // import exceljs
 let db;
 
 /**
@@ -15,22 +15,22 @@ export function initializeDataService(database) {
  */
 export function loadHistoryData() {
     const tbody = document.getElementById('history-body');
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
     get(ref(db, 'tracker/history')).then((snapshot) => {
         if (snapshot.exists()) {
             let htmlString = '';
             snapshot.forEach((child) => {
                 const row = child.val();
-                // Lưu ý: Dữ liệu vận tốc được lưu nhưng không được hiển thị ở đây trong code gốc.
-                htmlString += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td></tr>`;
+                // Lưu ý: Dữ liệu vận tốc được lưu nhưng không được hiển thị ở đây trong code gốc. // Đã thay thế giá trị 0 cho vận tốc
+                htmlString += `<tr><td>${row.timestamp || '-'}</td><td>${row.lat || '-'}</td><td>${row.lng || '-'}</td><td>${row.speed || '0'}</td></tr>`;
             });
             tbody.innerHTML = htmlString;
         } else {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Chưa có dữ liệu</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Chưa có dữ liệu</td></tr>`;
         }
     }).catch(error => {
         console.error("Lỗi tải dữ liệu lịch sử:", error);
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: red;">Lỗi tải dữ liệu.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">Lỗi tải dữ liệu.</td></tr>`;
     });
 }
 
@@ -52,11 +52,17 @@ export function loadFallData() {
 }
 
 export function exportHistoryToExcel() {
-    // Giả định thư viện XLSX đã được tải toàn cục qua thẻ <script>.
-    const wb = XLSX.utils.table_to_book(document.getElementById('history-table'), { sheet: "LichSu" }); XLSX.writeFile(wb, "Lich_Su_Di_Chuyen.xlsx");
+    const table = document.getElementById('history-table');
+    if (!table) return; // Kiểm tra an toàn
+    
+    const wb = XLSX.utils.table_to_book(table, { sheet: "LichSu" }); 
+    XLSX.writeFile(wb, "Lich_Su_Di_Chuyen.xlsx");
 }
 
 export function exportFailsToExcel() {
-    // Giả định thư viện XLSX đã được tải toàn cục qua thẻ <script>.
-    const wb = XLSX.utils.table_to_book(document.getElementById('fall-table'), { sheet: "TeNga" }); XLSX.writeFile(wb, "Lich_Su_Te_Nga.xlsx");
+    const table = document.getElementById('fall-table');
+    if (!table) return; // Kiểm tra an toàn
+
+    const wb = XLSX.utils.table_to_book(table, { sheet: "TeNga" }); 
+    XLSX.writeFile(wb, "Lich_Su_Te_Nga.xlsx");
 }

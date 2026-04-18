@@ -2,7 +2,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import 'leaflet-routing-machine';
-import * as XLSX from 'xlsx';
 import './style.css';
 
 import { firebaseConfig, i18n, appVersion } from './config.js';

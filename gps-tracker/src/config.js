@@ -10,7 +10,7 @@ export const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export const appVersion = "2.3.17"; 
+export const appVersion = "2.4.0"; 
 
 export const i18n = {
     vi: { 
