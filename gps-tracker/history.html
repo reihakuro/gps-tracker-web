@@ -3,35 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lịch sử dữ liệu hệ thống GPS Tracker Pro">
-  <title>Lịch sử hệ thống - GPS TRACKER PRO</title>
+  <meta name="description" content="Lịch sử dữ liệu hệ thống WPS Tracker Pro">
+  <title>Lịch sử hệ thống - WPS TRACKER PRO</title>
   <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/style.css">
 </head>
-<body class="history-page">
+<body class="apple-page-body apple-theme">
 
-  <nav class="nav-bar">
-    <a href="/dashboard.html" class="nav-brand">GPS TRACKER</a>
-    <div class="nav-links">
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/history.html" class="active">Lịch sử</a>
-      <a href="/overview.html">Tổng quan</a>
-      <button id="theme-toggle" style="background:none; border:none; cursor:pointer; font-size:18px;">🌙</button>
+  <nav class="apple-nav glassmorphism">
+    <div class="nav-content">
+      <a href="/dashboard.html" class="nav-brand">WPS TRACKER</a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">Dashboard</a>
+        <a href="/history.html" class="nav-link active">Lịch sử</a>
+        <a href="/overview.html" class="nav-link">Tổng quan</a>
+        <button id="theme-toggle" class="apple-icon-btn">🌙</button>
+      </div>
     </div>
   </nav>
 
-  <div style="padding: 20px;">
-    <div class="history-header">
-      <h1>📊 DỮ LIỆU LỊCH SỬ HỆ THỐNG</h1>
-      <a href="/dashboard.html" class="back-btn" id="back-btn">⬅ Quay lại Dashboard</a>
+  <div class="page-container">
+    <div class="page-header">
+      <h1 class="page-title">Dữ liệu Lịch sử Hệ thống</h1>
+      <a href="/dashboard.html" class="apple-btn secondary" id="back-btn">
+        <span class="icon">⬅</span> Quay lại Dashboard
+      </a>
     </div>
 
     <div class="history-container">
-
       <!-- Bảng lộ trình -->
-      <div class="history-section">
-        <h2 style="color: var(--primary);">📍 Lịch sử di chuyển</h2>
-        <div class="table-container" style="max-height: 400px;">
-          <table id="history-table">
+      <div class="apple-card">
+        <div class="card-header">
+          <h2 class="card-title">Lịch sử di chuyển</h2>
+          <button class="apple-btn text success" id="export-excel-btn">
+            <span class="icon">📥</span> Xuất Excel
+          </button>
+        </div>
+        <div class="table-container apple-scroll">
+          <table id="history-table" class="apple-table">
             <thead>
               <tr>
                 <th>Thời gian</th>
@@ -42,16 +51,18 @@
             <tbody id="history-body"></tbody>
           </table>
         </div>
-        <div class="action-buttons">
-          <button class="btn-excel" id="export-excel-btn">📥 Tải file Excel Lộ trình</button>
-        </div>
       </div>
 
       <!-- Bảng sự cố té ngã -->
-      <div class="history-section">
-        <h2 style="color: var(--danger);">⚠️ Lịch sử sự cố (Té ngã)</h2>
-        <div class="table-container" style="max-height: 400px;">
-          <table id="fall-table">
+      <div class="apple-card danger-accent">
+        <div class="card-header">
+          <h2 class="card-title" style="color: var(--danger);">Sự cố Té ngã</h2>
+          <button class="apple-btn text warning" id="export-fall-excel-btn">
+            <span class="icon">📥</span> Xuất Excel
+          </button>
+        </div>
+        <div class="table-container apple-scroll">
+          <table id="fall-table" class="apple-table">
             <thead>
               <tr>
                 <th>Thời gian</th>
@@ -62,11 +73,7 @@
             <tbody id="fall-body"></tbody>
           </table>
         </div>
-        <div class="action-buttons">
-          <button class="btn-excel" id="export-fall-excel-btn" style="background-color: var(--warning);">📥 Tải file Excel Té ngã</button>
-        </div>
       </div>
-
     </div>
   </div>
 

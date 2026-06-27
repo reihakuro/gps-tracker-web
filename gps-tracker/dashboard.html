@@ -3,75 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Dashboard GPS Tracker Pro - Theo dõi vị trí thời gian thực">
-  <title>Dashboard - GPS TRACKER PRO</title>
+  <meta name="description" content="Dashboard WPS Tracker Pro - Theo dõi vị trí thời gian thực">
+  <title>Dashboard - WPS TRACKER PRO</title>
   <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* Ensure map has dimensions before Vite injects style.css */
+    #map {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100vh;
+      z-index: 1;
+    }
+  </style>
+  <script>
+    window.addEventListener('error', function(e) {
+      document.body.innerHTML += '<div style="position:fixed;top:0;left:0;z-index:999999;background:red;color:white;padding:20px;">' + e.message + ' at ' + e.filename + ':' + e.lineno + '</div>';
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      document.body.innerHTML += '<div style="position:fixed;top:50px;left:0;z-index:999999;background:orange;color:white;padding:20px;">' + e.reason + '</div>';
+    });
+  </script>
 </head>
-<body class="dashboard-body">
+<body class="dashboard-body apple-theme">
   <div id="emergency-overlay"></div>
 
-  <div class="dashboard-header">
-    <div class="header-left">
-      <div id="connection-dot" class="status-dot"></div>
-      <div class="brand-text">GPS TRACKER</div>
-      <div id="welcome-text" style="font-size: 12px; color: var(--primary); margin-left: 10px; font-weight: bold;"></div>
-      <div class="tab-container-header" style="display: flex; gap: 8px; margin-left: 20px;">
-        <button id="tab-map-btn" class="tab-btn active" data-key="tab_map">🗺️ Bản đồ</button>
-        <button id="tab-3d-btn" class="tab-btn" data-key="tab_3d">🏍️ Mô hình 3D</button>
-      </div>
-    </div>
-
-    <div class="header-right">
-      <div class="routing-panel">
-        <select id="travel-mode">
-          <option value="cycling" data-key="mode_bike">🏍️ Xe máy</option>
-          <option value="driving" data-key="mode_car">🚗 Xe hơi</option>
-          <option value="walking" data-key="mode_foot">🚶 Đi bộ</option>
-        </select>
-        <button id="find-way" data-key="btn_find" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer; font-size:12px;">TÌM ĐƯỜNG</button>
-      </div>
-
-      <div class="btn-group">
-        <button id="buzzer-btn" class="control-btn btn-warning"><span data-key="btn_buzzer">🔊 Tìm xe</span></button>
-        <button id="fall-btn" class="control-btn btn-alert"><span data-key="btn_fall">🔔 Té ngã</span></button>
-        <a href="/history.html" class="control-btn" style="text-decoration:none;"><span data-key="btn_history">📜 Lịch sử</span></a>
-        <a href="/overview.html" class="control-btn" style="text-decoration:none;"><span>📋 Tổng quan</span></a>
-        <button id="logout-btn" class="control-btn btn-alert"><span data-key="btn_logout">Thoát</span></button>
-      </div>
-
-      <div class="metrics-container">
-        <div class="metric-card">
-          <h3 data-key="lbl_dwell">Đang ở đây</h3>
-          <p id="dwell-val" style="color: var(--primary);">00:00:00</p>
-        </div>
-        <div class="metric-card" id="tilt-warning">
-          <h3 data-key="st_label">Trạng thái</h3>
-          <p id="tilt-text" data-key="st_ok" style="font-size: 13px; font-weight: bold;">Cân bằng</p>
-        </div>
-      </div>
-
-      <div class="theme-lang">
-        <button id="lang-toggle" class="control-btn">EN</button>
-        <button id="theme-toggle" style="background:none; border:none; cursor:pointer; font-size:20px;">🌙</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- Fullscreen map -->
   <div id="map"></div>
   
+  <!-- Fullscreen 3D view (hidden by default) -->
   <div id="dashboard-3d" class="hidden">
     <div class="dashboard-3d-layout">
-      <!-- 3D Canvas Area -->
       <div class="canvas-3d-wrapper">
         <canvas id="canvas-3d"></canvas>
         <div class="hover-tip-3d" id="hover-tip-3d">
-          <span id="hover-tip-text" data-key="panel_3d_instr_1">👉 Nhấp chuột trái & kéo để xoay xe</span>
+          <span id="hover-tip-text" data-key="panel_3d_instr_1">Nhấp chuột trái & kéo để xoay xe</span>
         </div>
       </div>
       
-      <!-- Side telemetry panel -->
-      <div class="panel-3d">
+      <!-- Glassmorphism 3D Panel -->
+      <div class="panel-3d floating-glass-panel">
         <h2 data-key="panel_3d_title">HỆ THỐNG GIÁM SÁT 3D</h2>
         <div class="telemetry-grid">
           <div class="telemetry-item">
@@ -79,53 +50,142 @@
             <span class="telemetry-val" id="telemetry-angle">0.0°</span>
           </div>
           <div class="telemetry-item">
-            <span class="telemetry-label" data-key="panel_3d_trunk">Trạng thái cốp</span>
+            <span class="telemetry-label" data-key="panel_3d_trunk">Cốp xe</span>
             <span class="telemetry-val" id="telemetry-trunk" data-key="panel_3d_trunk_close" style="color: var(--warning); font-weight: bold;">Đóng</span>
           </div>
-          <div class="telemetry-item">
+          <div class="telemetry-item" style="grid-column: span 2;">
             <span class="telemetry-label" data-key="st_label">Trạng thái</span>
             <span class="telemetry-val" id="telemetry-status" data-key="st_ok">Cân bằng</span>
+          </div>
+        </div>
+
+        <!-- Color picker in panel -->
+        <div class="color-picker-section">
+          <span class="color-picker-title" data-key="color_picker_title">Màu xe</span>
+          <div class="color-options">
+            <button class="color-btn active" data-color="#1d4ed8" style="background-color: #1d4ed8;" title="Royal Blue"></button>
+            <button class="color-btn" data-color="#dc2626" style="background-color: #dc2626;" title="Crimson Red"></button>
+            <button class="color-btn" data-color="#1e293b" style="background-color: #1e293b;" title="Matte Black"></button>
+            <button class="color-btn" data-color="#10b981" style="background-color: #10b981;" title="Emerald Green"></button>
+            <button class="color-btn" data-color="#f59e0b" style="background-color: #f59e0b;" title="Champagne Gold"></button>
           </div>
         </div>
         
         <div class="instruction-box">
           <h3 data-key="panel_3d_instruction">Hướng dẫn tương tác</h3>
           <ul>
-            <li data-key="panel_3d_instr_1">👉 Nhấp chuột trái & kéo để xoay xe</li>
-            <li data-key="panel_3d_instr_2">👉 Nhấp chuột phải & kéo để dịch chuyển</li>
-            <li data-key="panel_3d_instr_3">👉 Cuộn chuột để phóng to / thu nhỏ</li>
-            <li data-key="panel_3d_instr_4" style="color: var(--warning); font-weight: bold;">👉 Nhấp vào Cốp Xe để MỞ/ĐÓNG cốp</li>
-            <li data-key="panel_3d_instr_5" style="color: var(--primary); font-weight: bold;">👉 Nhấp vào hộp thiết bị IoT màu xanh trong cốp để xem Sơ đồ mạch</li>
+            <li data-key="panel_3d_instr_1">Nhấp chuột trái & kéo để xoay xe</li>
+            <li data-key="panel_3d_instr_2">Nhấp chuột phải & kéo để dịch chuyển</li>
+            <li data-key="panel_3d_instr_3">Cuộn chuột để phóng to / thu nhỏ</li>
+            <li data-key="panel_3d_instr_4" style="color: var(--warning); font-weight: bold;">Nhấp vào Cốp Xe để MỞ/ĐÓNG cốp</li>
+            <li data-key="panel_3d_instr_5" style="color: var(--primary); font-weight: bold;">Nhấp vào hộp thiết bị IoT màu xanh trong cốp để xem Sơ đồ mạch</li>
           </ul>
         </div>
       </div>
     </div>
   </div>
   
-  <div class="info-btn" id="open-info">i</div>
+  <!-- Apple UI Overlay Layer -->
+  <div class="apple-ui-layer">
+    
+    <!-- Top Left Widgets -->
+    <div class="widget-group top-left">
+      <div class="glass-widget brand-widget">
+        <div id="connection-dot" class="status-dot"></div>
+        <div class="brand-text">WPS TRACKER</div>
+        <div id="welcome-text" class="welcome-text"></div>
+      </div>
+      <div class="glass-widget tab-widget">
+        <div class="tab-container-header">
+          <button id="tab-map-btn" class="apple-tab-btn active" data-key="tab_map">🗺️ Bản đồ</button>
+          <button id="tab-3d-btn" class="apple-tab-btn" data-key="tab_3d">🏍️ Mô hình 3D</button>
+        </div>
+      </div>
+    </div>
 
-  <div class="modal" id="info-modal">
-    <div class="modal-content">
+    <!-- Top Right Widgets -->
+    <div class="widget-group top-right">
+      <div class="glass-widget routing-widget">
+        <select id="travel-mode" class="apple-select">
+          <option value="cycling" data-key="mode_bike">🏍️ Xe máy</option>
+          <option value="driving" data-key="mode_car">🚗 Xe hơi</option>
+          <option value="walking" data-key="mode_foot">🚶 Đi bộ</option>
+        </select>
+        <button id="find-way" class="apple-btn-text" data-key="btn_find">TÌM ĐƯỜNG</button>
+      </div>
+      
+      <div class="glass-widget metrics-widget">
+        <div class="metric-compact">
+          <span class="lbl" data-key="lbl_dwell">Dừng:</span>
+          <span class="val" id="dwell-val">00:00:00</span>
+        </div>
+        <div class="metric-compact" id="tilt-warning">
+          <span class="lbl" data-key="st_label">Trạng thái:</span>
+          <span class="val" id="tilt-text" data-key="st_ok">Cân bằng</span>
+        </div>
+      </div>
+      
+      <div class="glass-widget controls-widget">
+        <button id="lang-toggle" class="apple-icon-btn">EN</button>
+        <button id="theme-toggle" class="apple-icon-btn">🌙</button>
+      </div>
+    </div>
+
+    <!-- Bottom Dock (Apple Style) -->
+    <div class="apple-dock glassmorphism">
+      <button id="buzzer-btn" class="dock-item warning" title="Tìm xe">
+        <span class="icon">🔊</span>
+        <span class="label" data-key="btn_buzzer">Tìm xe</span>
+      </button>
+      <button id="fall-btn" class="dock-item danger" title="Té ngã">
+        <span class="icon">🔔</span>
+        <span class="label" data-key="btn_fall">Té ngã</span>
+      </button>
+      <div class="dock-divider"></div>
+      <a href="/history.html" class="dock-item" title="Lịch sử">
+        <span class="icon">📜</span>
+        <span class="label" data-key="btn_history">Lịch sử</span>
+      </a>
+      <a href="/overview.html" class="dock-item" title="Tổng quan">
+        <span class="icon">📋</span>
+        <span class="label">Tổng quan</span>
+      </a>
+      <div class="dock-divider"></div>
+      <button id="logout-btn" class="dock-item danger" title="Thoát">
+        <span class="icon">🚪</span>
+        <span class="label" data-key="btn_logout">Thoát</span>
+      </button>
+    </div>
+
+    <div class="info-btn glassmorphism" id="open-info">i</div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal apple-modal" id="info-modal">
+    <div class="modal-content glassmorphism">
       <h2 id="app-version-display"></h2>
       <h4 data-key="about_title">Thông tin dự án</h4>
       <div class="info-body">
-        <div style="margin-bottom: 20px;"><span data-key="about_subject">Môn học:</span><strong data-key="val_subject">Cơ sở và ứng dụng IoTs</strong></div>
-        <div><span data-key="about_by">Thiết kế bởi:</span><strong data-key="val_group">Nhóm 7 tại HCM-UTE</strong></div>
+        <div class="info-row"><span data-key="about_subject">Môn học:</span><strong data-key="val_subject">Cơ sở và ứng dụng IoTs</strong></div>
+        <div class="info-row"><span data-key="about_by">Thiết kế bởi:</span><strong data-key="val_group">Nhóm 7 tại HCM-UTE</strong></div>
         <div class="member-list">
-          Phạm Trần Huy - 21161131<br>Chống Định Khang - 23161277<br>
-          Phạm Trung Kiên - 23161283<br>Hoàng Bảo Phúc - 23161309<br>Lê Thanh Tú - 23161357
+          <p>Phạm Trần Huy - 21161131</p>
+          <p>Chống Định Khang - 23161277</p>
+          <p>Phạm Trung Kiên - 23161283</p>
+          <p>Hoàng Bảo Phúc - 23161309</p>
+          <p>Lê Thanh Tú - 23161357</p>
         </div>
       </div>
       <div class="quote" data-key="val_quote">"Chia sẻ là cách tốt nhất để học tập"</div>
-      <button class="close-modal" id="close-info" data-key="btn_close">Đóng</button>
+      <button class="close-modal apple-btn primary" id="close-info" data-key="btn_close">Đóng</button>
     </div>
   </div>
 
-  <div class="modal" id="fall-modal">
-    <div class="modal-content wide">
+  <div class="modal apple-modal" id="fall-modal">
+    <div class="modal-content wide glassmorphism">
       <h2 data-key="fall_title" style="color: var(--danger);">Lịch sử sự cố (Té ngã)</h2>
-      <div class="table-container">
-        <table id="fall-table">
+      <div class="table-container apple-scroll">
+        <table id="fall-table" class="apple-table">
           <thead>
             <tr>
               <th data-key="th_time">Thời gian</th>
@@ -136,26 +196,19 @@
           <tbody id="fall-body"></tbody>
         </table>
       </div>
-      <div style="display: flex; gap: 10px; justify-content: center;">
-        <button class="btn-excel" id="export-fall-excel-btn" data-key="btn_export">Tải file Excel</button>
-        <button class="close-modal btn-grey" id="close-fall" data-key="btn_close">Đóng</button>
+      <div class="modal-actions">
+        <button class="btn-excel apple-btn success" id="export-fall-excel-btn" data-key="btn_export">Tải file Excel</button>
+        <button class="close-modal apple-btn secondary" id="close-fall" data-key="btn_close">Đóng</button>
       </div>
     </div>
   </div>
 
-    </div>
-  </div>
-
-  <!-- Modal Sơ đồ mạch điện tương tác -->
-  <div class="modal" id="circuit-modal">
-    <div class="modal-content wide circuit-modal-content">
-      <h2 data-key="circuit_title">SƠ ĐỒ NGUYÊN LÝ MẠCH GPS TRACKER ESP32</h2>
-      
+  <div class="modal apple-modal" id="circuit-modal">
+    <div class="modal-content wide circuit-modal-content glassmorphism">
+      <h2 data-key="circuit_title">SƠ ĐỒ NGUYÊN LÝ MẠCH WPS TRACKER ESP32</h2>
       <div class="circuit-container">
-        <!-- SVG Interactive Schematic -->
-        <div class="circuit-svg-wrapper">
+        <div class="circuit-svg-wrapper apple-panel">
           <svg viewBox="0 0 800 500" class="circuit-svg" id="circuit-svg">
-            <!-- Background Grid lines for aesthetic -->
             <defs>
               <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
                 <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(15, 23, 42, 0.05)" stroke-width="1"/>
@@ -167,72 +220,38 @@
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            <!-- Wire Connections (Traces) -->
             <g id="circuit-traces" stroke="rgba(79, 131, 188, 0.4)" stroke-width="3" fill="none" stroke-linejoin="round">
-              <!-- VCC Bus (Red) connects ESP32 3.3V to MPU6050 VCC -->
               <path class="trace-vcc" d="M 285 140 L 240 140 L 240 60 L 560 60 L 560 200 L 585 200" stroke="rgba(224, 82, 82, 0.4)" />
-              
-              <!-- GND Bus (Blue/Grey) connects ESP32 GND, MPU6050 GND, and Buzzer Negative -->
               <path class="trace-gnd" d="M 285 160 L 220 160 L 220 80 L 550 80 L 550 220 L 585 220 M 220 160 L 220 270 L 175 270" stroke="rgba(107, 123, 141, 0.4)" />
-              
-              <!-- MPU6050 SDA to ESP32 GPIO 21 (Yellow) -->
               <path class="trace-mpu-sda" d="M 515 220 L 535 220 L 535 290 L 585 290" stroke="rgba(229, 168, 75, 0.4)" />
-              
-              <!-- MPU6050 SCL to ESP32 GPIO 22 (Yellow) -->
               <path class="trace-mpu-scl" d="M 515 180 L 545 180 L 545 265 L 585 265" stroke="rgba(229, 168, 75, 0.4)" />
-              
-              <!-- Buzzer Positive to ESP32 GPIO 18 (Orange) -->
               <path class="trace-buzzer" d="M 285 240 L 175 240" stroke="rgba(229, 168, 75, 0.4)" />
             </g>
 
-            <!-- ESP32 NodeMCU DevKit -->
             <g class="component-group" id="comp-esp32" cursor="pointer">
               <rect x="280" y="100" width="240" height="300" rx="10" fill="#1A2030" stroke="#5B8FC8" stroke-width="3" filter="url(#glow)" />
-              <!-- USB Port -->
               <rect x="375" y="85" width="50" height="15" fill="#3a3a3c" />
-              <!-- ESP-WROOM-32 Chip Module -->
               <rect x="340" y="150" width="120" height="130" rx="5" fill="#222938" stroke="#2E3648" />
               <rect x="360" y="165" width="80" height="80" rx="3" fill="#121620" stroke="#7A8A9E" />
               <text x="400" y="210" fill="#fff" font-size="11" font-family="monospace" text-anchor="middle" font-weight="bold">ESP32-WROOM</text>
-              
-              <!-- Left side pins -->
               <g fill="#E5A84B">
-                <!-- 3.3V -->
-                <circle cx="285" cy="140" r="4" />
-                <text x="295" y="144" fill="#8e8e93" font-size="10" font-family="sans-serif">3.3V</text>
-                <!-- GND -->
-                <circle cx="285" cy="160" r="4" />
-                <text x="295" y="164" fill="#8e8e93" font-size="10" font-family="sans-serif">GND</text>
-                <!-- GPIO 18 -->
-                <circle cx="285" cy="240" r="4" />
-                <text x="295" y="244" fill="#8e8e93" font-size="10" font-family="sans-serif">G18 (PWM)</text>
+                <circle cx="285" cy="140" r="4" /><text x="295" y="144" fill="#8e8e93" font-size="10" font-family="sans-serif">3.3V</text>
+                <circle cx="285" cy="160" r="4" /><text x="295" y="164" fill="#8e8e93" font-size="10" font-family="sans-serif">GND</text>
+                <circle cx="285" cy="240" r="4" /><text x="295" y="244" fill="#8e8e93" font-size="10" font-family="sans-serif">G18 (PWM)</text>
               </g>
-              
-              <!-- Right side pins -->
               <g fill="#E5A84B">
-                <!-- GPIO 22 -->
-                <circle cx="515" cy="180" r="4" />
-                <text x="505" y="184" fill="#8e8e93" font-size="10" font-family="sans-serif" text-anchor="end">G22 (SCL)</text>
-                <!-- GPIO 21 -->
-                <circle cx="515" cy="220" r="4" />
-                <text x="505" y="224" fill="#8e8e93" font-size="10" font-family="sans-serif" text-anchor="end">G21 (SDA)</text>
+                <circle cx="515" cy="180" r="4" /><text x="505" y="184" fill="#8e8e93" font-size="10" font-family="sans-serif" text-anchor="end">G22 (SCL)</text>
+                <circle cx="515" cy="220" r="4" /><text x="505" y="224" fill="#8e8e93" font-size="10" font-family="sans-serif" text-anchor="end">G21 (SDA)</text>
               </g>
-              
               <text x="400" y="360" fill="#5B8FC8" font-size="16" font-family="sans-serif" text-anchor="middle" font-weight="bold">ESP32 NodeMCU</text>
             </g>
 
-            <!-- MPU6050 Accel/Gyro Module -->
             <g class="component-group" id="comp-mpu" cursor="pointer">
               <rect x="580" y="150" width="140" height="190" rx="8" fill="#1A2030" stroke="#E5A84B" stroke-width="2" />
-              <!-- Sensor Chip -->
               <rect x="630" y="200" width="40" height="40" rx="2" fill="#121620" stroke="#2E3648" />
               <text x="650" y="225" fill="#fff" font-size="9" font-family="sans-serif" text-anchor="middle">MPU6050</text>
-              <!-- LDO Regulator -->
               <rect x="680" y="170" width="15" height="15" fill="#3a3a3c" />
-              <!-- Status LED -->
               <circle id="mpu-led" cx="595" cy="165" r="4" fill="#4CAF7D" />
-              
-              <!-- Pins labels -->
               <g fill="#E5A84B" font-size="9" font-family="sans-serif">
                 <circle cx="585" cy="200" r="3" /><text x="595" y="203" fill="#8e8e93">VCC</text>
                 <circle cx="585" cy="220" r="3" /><text x="595" y="223" fill="#8e8e93">GND</text>
@@ -242,15 +261,12 @@
               <text x="650" y="315" fill="#E5A84B" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="bold">MPU6050 IMU</text>
             </g>
 
-            <!-- Active Buzzer -->
             <g class="component-group" id="comp-buzzer" cursor="pointer">
               <rect x="80" y="180" width="120" height="140" rx="10" fill="#1A2030" stroke="#E5A84B" stroke-width="2" />
               <circle cx="140" cy="240" r="30" fill="#121620" stroke="#222938" />
               <circle cx="140" cy="240" r="8" fill="#000" />
               <path id="buzzer-wave-1" class="buzzer-wave" d="M 85 240 A 55 55 0 0 1 195 240" fill="none" stroke="#E5A84B" stroke-width="2" opacity="0" />
               <path id="buzzer-wave-2" class="buzzer-wave" d="M 70 240 A 70 70 0 0 1 210 240" fill="none" stroke="#E5A84B" stroke-width="2" opacity="0" />
-              
-              <!-- Pins -->
               <g fill="#E5A84B" font-size="9" font-family="sans-serif" text-anchor="end">
                 <circle cx="175" cy="240" r="3" /><text x="165" y="243" fill="#8e8e93">Dương (+)</text>
                 <circle cx="175" cy="270" r="3" /><text x="165" y="273" fill="#8e8e93">Âm (-)</text>
@@ -259,15 +275,13 @@
             </g>
           </svg>
         </div>
-
-        <div class="circuit-detail-panel">
-          <h3 id="circuit-comp-name" style="color: var(--primary); margin-top: 0;">Chọn linh kiện</h3>
-          <p id="circuit-comp-desc" style="line-height: 1.5; color: var(--text-muted);">Di chuột lên linh kiện trên sơ đồ để xem vai trò và thông tin kết nối chi tiết.</p>
+        <div class="circuit-detail-panel apple-panel">
+          <h3 id="circuit-comp-name" style="margin-top: 0;">Chọn linh kiện</h3>
+          <p id="circuit-comp-desc">Di chuột lên linh kiện trên sơ đồ để xem vai trò và thông tin kết nối chi tiết.</p>
         </div>
       </div>
-      
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="close-modal btn-grey" id="close-circuit" data-key="btn_close">Đóng</button>
+      <div class="modal-actions" style="justify-content: center; margin-top: 24px;">
+        <button class="close-modal apple-btn secondary" id="close-circuit" data-key="btn_close">Đóng</button>
       </div>
     </div>
   </div>

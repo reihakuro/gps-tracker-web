@@ -3,82 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Tổng quan đề tài GPS Tracker Pro - Nhóm 7 HCMUTE">
-  <title>Tổng quan đề tài - GPS TRACKER PRO</title>
+  <meta name="description" content="Tổng quan đề tài WPS Tracker Pro - Nhóm 7 HCMUTE">
+  <title>Tổng quan đề tài - WPS TRACKER PRO</title>
   <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/src/style.css">
 </head>
-<body class="overview-page">
+<body class="apple-page-body apple-theme">
 
-  <nav class="nav-bar">
-    <a href="/dashboard.html" class="nav-brand">GPS TRACKER</a>
-    <div class="nav-links">
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/history.html">Lịch sử</a>
-      <a href="/overview.html" class="active">Tổng quan</a>
-      <button id="theme-toggle" style="background:none; border:none; cursor:pointer; font-size:18px;">🌙</button>
+  <nav class="apple-nav glassmorphism">
+    <div class="nav-content">
+      <a href="/dashboard.html" class="nav-brand">WPS TRACKER</a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">Dashboard</a>
+        <a href="/history.html" class="nav-link">Lịch sử</a>
+        <a href="/overview.html" class="nav-link active">Tổng quan</a>
+        <button id="theme-toggle" class="apple-icon-btn">🌙</button>
+      </div>
     </div>
   </nav>
 
-  <header class="overview-header">
-    <div class="logo-container">
-      <img src="/picture/logo-ute.png" alt="Logo Trường" class="logo-circle">
-      <img src="/picture/logo-khoa.png" alt="Logo Khoa" class="logo-circle">
-    </div>
-    
-    <div class="title-container">
-      <div class="title-box">
-        <h1>TỔNG QUAN ĐỀ TÀI</h1>
+  <div class="page-container">
+    <header class="overview-header-apple">
+      <div class="logo-group">
+        <div class="logo-wrapper"><img src="/picture/logo-ute.png" alt="Logo Trường"></div>
+        <div class="logo-wrapper"><img src="/picture/logo-khoa.png" alt="Logo Khoa"></div>
       </div>
-    </div>
-    
-    <div class="header-spacer"></div>
-  </header>
-
-  <main class="overview-grid">
-    
-    <div class="content-box box-1">
-      <div class="core-features">
-        <h3>Tính năng cốt lõi</h3>
-        <ul>
-          <li>Định vị thời gian thực (GPS)</li>
-          <li>Cảnh báo sự cố té ngã (MPU6050)</li>
-          <li>Điều khiển còi báo từ xa</li>
-          <li>Lưu trữ và xuất dữ liệu Excel</li>
-        </ul>
-      </div>
-
-      <div class="project-info">
-        <h3>Thông tin dự án</h3>
-        <p><strong>Môn học:</strong> Cơ sở và ứng dụng IoTs</p>
-        <p><strong>Thực hiện:</strong> Nhóm 7 - HCMUTE</p>
-      </div>
-
-      <footer class="box-footer">
-        <p>&copy; 2026 GPS Tracker Pro</p>
-      </footer>
-    </div>
-
-    <div class="content-box box-2">
-      <img src="/picture/gps-tracker.jpg" alt="Giao diện GPS Tracker" class="preview-image">
       
-      <div class="hover-overlay">
-        <a href="/dashboard.html" class="view-detail-btn">Xem Dashboard</a>
+      <div class="title-block">
+        <h1 class="gradient-text">TỔNG QUAN ĐỀ TÀI</h1>
+        <p class="subtitle">Hệ thống giám sát hành trình theo thời gian thực</p>
       </div>
-    </div>
+    </header>
 
-    <div class="content-box box-3">
-      <img src="/picture/gps-tracker.jpg" alt="Mạch thực tế" class="preview-image">
-  
-      <div class="hover-overlay">
-        <a href="/history.html" class="view-detail-btn">Xem lịch sử</a>
+    <main class="overview-grid-apple">
+      
+      <div class="apple-card feature-card">
+        <h3>Tính năng cốt lõi</h3>
+        <ul class="feature-list">
+          <li>
+            <span class="icon">📍</span>
+            <span>Định vị thời gian thực (WPS) độ chính xác cao</span>
+          </li>
+          <li>
+            <span class="icon">⚠️</span>
+            <span>Cảnh báo sự cố té ngã tức thời (MPU6050)</span>
+          </li>
+          <li>
+            <span class="icon">🔊</span>
+            <span>Điều khiển còi báo động từ xa</span>
+          </li>
+          <li>
+            <span class="icon">📊</span>
+            <span>Lưu trữ dữ liệu & xuất báo cáo Excel</span>
+          </li>
+        </ul>
+
+        <div class="project-info-block">
+          <div class="info-row"><span>Môn học:</span> <strong>Cơ sở và ứng dụng IoTs</strong></div>
+          <div class="info-row"><span>Thực hiện:</span> <strong>Nhóm 7 - HCMUTE</strong></div>
+        </div>
       </div>
-    </div>
 
-  </main>
+      <div class="apple-card image-card">
+        <img src="/picture/picture_demo_dashboard.jpg" alt="Giao diện WPS Tracker" class="preview-image">
+        <div class="card-overlay glassmorphism">
+          <h3>Giao diện Điều khiển</h3>
+          <p>Trực quan, hiện đại và thân thiện với người dùng.</p>
+          <a href="/dashboard.html" class="apple-btn primary">Xem Dashboard</a>
+        </div>
+      </div>
+
+      <div class="apple-card image-card">
+        <img src="/picture/fall_history.png" alt="Lịch sử dữ liệu" class="preview-image">
+        <div class="card-overlay glassmorphism">
+          <h3>Lịch sử Hệ thống</h3>
+          <p>Xem lại lộ trình và sự cố hệ thống lưu trữ.</p>
+          <a href="/history.html" class="apple-btn primary">Xem Lịch sử</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
 
   <script>
-    // Theme toggle for overview page
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
       themeToggle.onclick = () => {
